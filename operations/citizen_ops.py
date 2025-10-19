@@ -1,17 +1,17 @@
 from database.connection import get_connection, release_connection
 
-def add_citizen(full_name, national_id, phone_number, email=None, address=None):
+def add_citizen(full_name, phone_number, email=None, address=None):
     """Add a new citizen to the database"""
     conn = get_connection()
     if conn:
         try:
             cur = conn.cursor()
             query = """
-                INSERT INTO citizens (full_name, national_id, phone_number, email, address)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO citizens (full_name, phone_number, email, address)
+                VALUES (%s, %s, %s, %s)
                 RETURNING citizen_id;
             """
-            cur.execute(query, (full_name, national_id, phone_number, email, address))
+            cur.execute(query, (full_name, phone_number, email, address))
             citizen_id = cur.fetchone()[0]
             conn.commit()
             cur.close()
@@ -134,9 +134,9 @@ def display_citizens(citizens):
         print("\nNo citizens found.")
         return
     
-    print("\n" + "="*100)
-    print(f"{'ID':<5} {'Name':<25} {'National ID':<15} {'Phone':<15} {'Email':<25}")
-    print("="*100)
+    print("\n" + "="*80)
+    print(f"{'ID':<5} {'Name':<25} {'Phone':<15} {'Email':<25}")
+    print("="*80)
     for citizen in citizens:
-        print(f"{citizen[0]:<5} {citizen[1]:<25} {citizen[2]:<15} {citizen[3]:<15} {citizen[4] or 'N/A':<25}")
-    print("="*100)
+        print(f"{citizen[0]:<5} {citizen[1]:<25} {citizen[2]:<15} {citizen[3] or 'N/A':<25}")
+    print("="*80)
