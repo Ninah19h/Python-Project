@@ -1,3 +1,80 @@
+Environment setup
+
+Clone the Repository
+> git clone https://github.com/yourusername/crime-reporting-system.git
+> cd crime-reporting-system
+
+Set Up Virtual Environment
+> python -m venv env
+
+Activate on linux
+> source env/bin/activate
+
+Install Dependancies 
+> pip install -r requirements.txt
+
+Set Up PostgreSQL Database (for those without the table)
+> CREATE DATABASE crime_reporting_db;
+
+Configure Environment Variables
+> Create a .env file at the project root
+DB_HOST=localhost
+DB_NAME=crime_reporting_db
+DB_USER=postgres
+DB_PASSWORD=Password
+DB_PORT=5432
+
+ Initialize Database Tables
+ > python -c "from database.connection import init_pool, execute_schema; init_pool(); execute_schema()"
+
+ To run the program
+ > python main.py
+
+PROJECT STRUCTURE 
+
+crime-reporting-system/
+│
+├── database/
+│   ├── connection.py      # Talks to PostgreSQL database
+│   └── schema.sql         # Creates the 4 tables (citizens, officers, cases, case_updates)
+│
+├── operations/
+│   ├── citizen_ops.py     # Add, view, update, delete citizens (Contains all the database functions)
+│   ├── officer_ops.py     # Add, view, update, delete officers (Contains all the database functions)
+│   ├── case_ops.py        # Add, view, filter, update cases (Contains all the database functions)
+│   └── case_update_ops.py # Add, view case progress notes (Contains all the database functions)
+│
+├── ui/
+│   └── menu.py            # What you see and interact with (menus, input forms)
+│
+├── main.py                # The file you run to start the system
+├── requirements.txt       # List of Python packages needed
+├── .env                   # Your database password (secret, not shared)
+├── .gitignore            # Tells Git what NOT to upload
+└── README.md             # Instructions and documentation
+
+Check existing tables
+> sudo -u postgres psql
+
+Connect to db
+> \c crime_reporting_db
+
+Check for tables
+> \dt
+
+Check inside the tables
+SELECT * FROM citizens;
+SELECT * FROM officers;
+SELECT * FROM case_updates;
+SELECT * FROM cases;
+
+Exit the db
+> \q
+
+Run the program 
+> python main.py
+
+
 Project Title
 Crime Reporting & Tracking System
 
