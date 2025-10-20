@@ -22,7 +22,7 @@ from operations.case_ops import (
 
 # Import case update functions
 from operations.case_update_ops import (
-    add_case_update, get_updates_by_case, display_case_updates
+    add_case_update, get_updates_by_case, delete_case_update, display_case_updates
 )
 
 
@@ -83,11 +83,12 @@ def citizen_menu():
         print("2. Report a Crime")
         print("3. View My Cases")
         print("4. Update My Information")
-        print("5. View All Citizens")
-        print("6. Back to Main Menu")
+        print("5. Delete My Account")
+        print("6. View All Citizens")
+        print("7. Back to Main Menu")
         print("\n" + "="*60)
         
-        choice = input("\nEnter your choice (1-6): ").strip()
+        choice = input("\nEnter your choice (1-7): ").strip()
         
         # Call appropriate function based on user's choice
         if choice == '1':
@@ -99,11 +100,13 @@ def citizen_menu():
         elif choice == '4':
             update_citizen_info()
         elif choice == '5':
-            view_all_citizens()
+            delete_citizen_account()
         elif choice == '6':
+            view_all_citizens()
+        elif choice == '7':
             break  # Exit to main menu
         else:
-            print(" Invalid choice! Please try again.")
+            print("Invalid choice! Please try again.")
             pause()
 
 
@@ -125,14 +128,14 @@ def register_citizen():
     
     # Validate required fields
     if not (full_name and phone_number):
-        print("\n Error: Full name and phone number are required!")
+        print("\nError: Full name and phone number are required!")
         pause()
         return
     
     # Add citizen to database
     citizen_id = add_citizen(full_name, phone_number, email, address)
     if citizen_id:
-        print(f"\n Registration successful! Your Citizen ID is: {citizen_id}")
+        print(f"\nRegistration successful! Your Citizen ID is: {citizen_id}")
         print("Please remember this ID for future reference.")
     
     pause()
@@ -153,7 +156,7 @@ def report_crime():
     # Check if citizen exists in database
     citizen = get_citizen_by_id(citizen_id)
     if not citizen:
-        print(f"\n Error: Citizen ID {citizen_id} not found!")
+        print(f"\nError: Citizen ID {citizen_id} not found!")
         print("Please register first if you haven't already.")
         pause()
         return
@@ -170,11 +173,11 @@ def report_crime():
         # Submit the crime report
         case_id = add_case(citizen_id, crime_type, description, location)
         if case_id:
-            print(f"\n Crime reported successfully!")
+            print(f"\nCrime reported successfully!")
             print(f"Your Case ID is: {case_id}")
             print("An officer will be assigned to your case soon.")
     else:
-        print("\n Error: All fields are required!")
+        print("\nError: All fields are required!")
     
     pause()
 
@@ -204,7 +207,7 @@ def view_citizen_cases():
     if citizen_cases:
         display_cases(citizen_cases)
     else:
-        print("\n📭 No cases found for this citizen ID.")
+        print("\nNo cases found for this citizen ID.")
     
     pause()
 
@@ -224,7 +227,7 @@ def update_citizen_info():
     # Verify citizen exists
     citizen = get_citizen_by_id(citizen_id)
     if not citizen:
-        print(f"\n Error: Citizen ID {citizen_id} not found!")
+        print(f"\nError: Citizen ID {citizen_id} not found!")
         pause()
         return
     
@@ -243,9 +246,46 @@ def update_citizen_info():
     
     # Update the database
     if update_citizen(citizen_id, full_name, phone_number, email, address):
-        print("\n Information updated successfully!")
+        print("\nInformation updated successfully!")
     else:
-        print("\n No changes made.")
+        print("\nNo changes made.")
+    
+    pause()
+
+
+def delete_citizen_account():
+    """
+    Delete a citizen account permanently from the system
+    Requires confirmation before deletion to prevent accidents
+    """
+    clear_screen()
+    print("\n" + "="*60)
+    print(" "*18 + "DELETE CITIZEN ACCOUNT")
+    print("="*60)
+    
+    citizen_id = input("\nEnter your Citizen ID: ").strip()
+    
+    # Verify citizen exists
+    citizen = get_citizen_by_id(citizen_id)
+    if not citizen:
+        print(f"\nError: Citizen ID {citizen_id} not found!")
+        pause()
+        return
+    
+    # Show warning and ask for confirmation
+    print(f"\nWARNING: You are about to delete the account for: {citizen[1]}")
+    print("This action cannot be undone!")
+    print("All cases reported by this citizen will also be deleted.")
+    confirm = input("\nType 'DELETE' to confirm deletion: ").strip()
+    
+    # Only proceed if user types exactly DELETE
+    if confirm == 'DELETE':
+        if delete_citizen(citizen_id):
+            print("\nAccount deleted successfully!")
+        else:
+            print("\nFailed to delete account.")
+    else:
+        print("\nDeletion cancelled. Account not deleted.")
     
     pause()
 
@@ -285,11 +325,14 @@ def officer_menu():
         print("7. Update Case Status")
         print("8. Add Case Update/Note")
         print("9. View Case Updates")
-        print("10. View All Officers")
-        print("11. Back to Main Menu")
+        print("10. Delete Case")
+        print("11. Delete Case Update")
+        print("12. View All Officers")
+        print("13. Delete Officer Account")
+        print("14. Back to Main Menu")
         print("\n" + "="*60)
         
-        choice = input("\nEnter your choice (1-11): ").strip()
+        choice = input("\nEnter your choice (1-14): ").strip()
         
         # Call appropriate function based on user's choice
         if choice == '1':
@@ -311,11 +354,17 @@ def officer_menu():
         elif choice == '9':
             view_case_updates()
         elif choice == '10':
-            view_all_officers()
+            delete_case_menu()
         elif choice == '11':
+            delete_update_menu()
+        elif choice == '12':
+            view_all_officers()
+        elif choice == '13':
+            delete_officer_account()
+        elif choice == '14':
             break  # Exit to main menu
         else:
-            print(" Invalid choice! Please try again.")
+            print("Invalid choice! Please try again.")
             pause()
 
 
@@ -341,9 +390,9 @@ def register_officer():
         # Add officer to database
         officer_id = add_officer(full_name, badge_number, rank, phone_number, station)
         if officer_id:
-            print(f"\n Registration successful! Your Officer ID is: {officer_id}")
+            print(f"\nRegistration successful! Your Officer ID is: {officer_id}")
     else:
-        print("\n Error: All required fields must be filled!")
+        print("\nError: All required fields must be filled!")
     
     pause()
 
@@ -391,7 +440,7 @@ def filter_cases_by_status():
     
     # Validate choice
     if choice not in status_map:
-        print("\n Invalid choice!")
+        print("\nInvalid choice!")
         pause()
         return
     
@@ -454,9 +503,9 @@ def assign_officer():
     
     # Attempt to assign officer to case
     if assign_officer_to_case(case_id, officer_id):
-        print("\n Officer assigned successfully!")
+        print("\nOfficer assigned successfully!")
     else:
-        print("\n Failed to assign officer!")
+        print("\nFailed to assign officer!")
     
     pause()
 
@@ -492,7 +541,7 @@ def update_status():
     
     # Validate choice
     if choice not in status_map:
-        print("\n Invalid choice!")
+        print("\nInvalid choice!")
         pause()
         return
     
@@ -500,9 +549,9 @@ def update_status():
     
     # Update the case status
     if update_case_status(case_id, status):
-        print(f"\n Case status updated to '{status}' successfully!")
+        print(f"\nCase status updated to '{status}' successfully!")
     else:
-        print("\n Failed to update case status!")
+        print("\nFailed to update case status!")
     
     pause()
 
@@ -527,9 +576,9 @@ def add_update():
         # Add update to database
         update_id = add_case_update(case_id, officer_id, update_note)
         if update_id:
-            print("\n Case update added successfully!")
+            print("\nCase update added successfully!")
     else:
-        print("\n All fields are required!")
+        print("\nAll fields are required!")
     
     pause()
 
@@ -549,6 +598,126 @@ def view_case_updates():
     # Get and display all updates for this case
     updates = get_updates_by_case(case_id)
     display_case_updates(updates)
+    pause()
+
+
+def delete_case_menu():
+    """
+    Delete a crime case permanently from the system
+    Requires confirmation before deletion
+    """
+    clear_screen()
+    print("\n" + "="*60)
+    print(" "*22 + "DELETE CASE")
+    print("="*60)
+    
+    case_id = input("\nEnter Case ID to delete: ").strip()
+    
+    # Verify case exists
+    case = get_case_by_id(case_id)
+    if not case:
+        print(f"\nError: Case ID {case_id} not found!")
+        pause()
+        return
+    
+    # Show warning and ask for confirmation
+    print(f"\nWARNING: You are about to delete case #{case_id}")
+    print(f"Crime Type: {case[3]}")
+    print(f"Location: {case[4]}")
+    print("\nThis action cannot be undone!")
+    print("All updates associated with this case will also be deleted.")
+    confirm = input("\nType 'DELETE' to confirm deletion: ").strip()
+    
+    # Only proceed if user types exactly DELETE
+    if confirm == 'DELETE':
+        if delete_case(case_id):
+            print("\nCase deleted successfully!")
+        else:
+            print("\nFailed to delete case.")
+    else:
+        print("\nDeletion cancelled. Case not deleted.")
+    
+    pause()
+
+
+def delete_update_menu():
+    """
+    Delete a specific case update from the system
+    Requires confirmation before deletion
+    """
+    clear_screen()
+    print("\n" + "="*60)
+    print(" "*19 + "DELETE CASE UPDATE")
+    print("="*60)
+    
+    # First show updates for a case
+    case_id = input("\nEnter Case ID to view its updates: ").strip()
+    updates = get_updates_by_case(case_id)
+    
+    if not updates:
+        print("\nNo updates found for this case.")
+        pause()
+        return
+    
+    # Display updates
+    display_case_updates(updates)
+    
+    # Ask which update to delete
+    update_id = input("\nEnter Update ID to delete: ").strip()
+    
+    # Show warning and ask for confirmation
+    print(f"\nWARNING: You are about to delete update #{update_id}")
+    print("This action cannot be undone!")
+    confirm = input("\nType 'DELETE' to confirm deletion: ").strip()
+    
+    # Only proceed if user types exactly DELETE
+    if confirm == 'DELETE':
+        if delete_case_update(update_id):
+            print("\nCase update deleted successfully!")
+        else:
+            print("\nFailed to delete case update.")
+    else:
+        print("\nDeletion cancelled. Update not deleted.")
+    
+    pause()
+
+
+def delete_officer_account():
+    """
+    Delete an officer account permanently from the system
+    Requires confirmation before deletion
+    """
+    clear_screen()
+    print("\n" + "="*60)
+    print(" "*18 + "DELETE OFFICER ACCOUNT")
+    print("="*60)
+    
+    officer_id = input("\nEnter Officer ID: ").strip()
+    
+    # Verify officer exists
+    officer = get_officer_by_id(officer_id)
+    if not officer:
+        print(f"\nError: Officer ID {officer_id} not found!")
+        pause()
+        return
+    
+    # Show warning and ask for confirmation
+    print(f"\nWARNING: You are about to delete the account for: {officer[1]}")
+    print(f"Badge Number: {officer[2]}")
+    print(f"Rank: {officer[3]}")
+    print("\nThis action cannot be undone!")
+    print("Cases assigned to this officer will remain but show no assigned officer.")
+    confirm = input("\nType 'DELETE' to confirm deletion: ").strip()
+    
+    # Only proceed if user types exactly DELETE
+    if confirm == 'DELETE':
+        if delete_officer(officer_id):
+            print("\nOfficer account deleted successfully!")
+        else:
+            print("\nFailed to delete officer account.")
+    else:
+        print("\nDeletion cancelled. Account not deleted.")
+    
     pause()
 
 
