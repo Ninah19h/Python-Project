@@ -1,31 +1,58 @@
+# Import system module for screen clearing
 import os
+
+# Import all citizen-related functions
 from operations.citizen_ops import (
     add_citizen, get_all_citizens, get_citizen_by_id, 
     update_citizen, delete_citizen, display_citizens
 )
+
+# Import all officer-related functions
 from operations.officer_ops import (
     add_officer, get_all_officers, get_officer_by_id,
     update_officer, delete_officer, display_officers
 )
+
+# Import all case-related functions
 from operations.case_ops import (
     add_case, get_all_cases, get_case_by_id,
     get_cases_by_status, get_cases_by_location, get_cases_by_crime_type,
     assign_officer_to_case, update_case_status, delete_case, display_cases
 )
+
+# Import case update functions
 from operations.case_update_ops import (
     add_case_update, get_updates_by_case, display_case_updates
 )
 
+
+# HELPER FUNCTIONS
+
 def clear_screen():
-    """Clear the terminal screen"""
+    """
+    Clear the terminal screen for a clean interface
+    Works on both Windows and Mac/Linux
+    """
     os.system('clear' if os.name != 'nt' else 'cls')
 
+
 def pause():
-    """Pause and wait for user to press Enter"""
+    """
+    Pause the program and wait for user to press Enter
+    Gives user time to read information before continuing
+    """
     input("\nPress Enter to continue...")
 
+
+# MAIN MENU
+
 def main_menu():
-    """Display main menu"""
+    """
+    Display the main menu with three portal options
+    
+    Returns:
+        User's choice as a string
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*15 + "CRIME REPORTING & TRACKING SYSTEM")
@@ -39,10 +66,14 @@ def main_menu():
     choice = input("\nEnter your choice (1-4): ").strip()
     return choice
 
-# ==================== CITIZEN PORTAL ====================
+
+# CITIZEN PORTAL
 
 def citizen_menu():
-    """Citizen portal menu"""
+    """
+    Display the citizen portal menu with all citizen options
+    Loops until user chooses to go back to main menu
+    """
     while True:
         clear_screen()
         print("\n" + "="*60)
@@ -58,6 +89,7 @@ def citizen_menu():
         
         choice = input("\nEnter your choice (1-6): ").strip()
         
+        # Call appropriate function based on user's choice
         if choice == '1':
             register_citizen()
         elif choice == '2':
@@ -69,37 +101,48 @@ def citizen_menu():
         elif choice == '5':
             view_all_citizens()
         elif choice == '6':
-            break
+            break  # Exit to main menu
         else:
-            print("❌ Invalid choice! Please try again.")
+            print(" Invalid choice! Please try again.")
             pause()
 
+
 def register_citizen():
-    """Register a new citizen"""
+    """
+    Register a new citizen in the system
+    Collects name, phone, email (optional), and address (optional)
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*18 + "CITIZEN REGISTRATION")
     print("="*60)
     
+    # Collect citizen information
     full_name = input("\nEnter full name: ").strip()
     phone_number = input("Enter phone number: ").strip()
     email = input("Enter email (optional, press Enter to skip): ").strip() or None
     address = input("Enter address (optional, press Enter to skip): ").strip() or None
     
+    # Validate required fields
     if not (full_name and phone_number):
-        print("\n❌ Error: Full name and phone number are required!")
+        print("\n Error: Full name and phone number are required!")
         pause()
         return
     
+    # Add citizen to database
     citizen_id = add_citizen(full_name, phone_number, email, address)
     if citizen_id:
-        print(f"\n✅ Registration successful! Your Citizen ID is: {citizen_id}")
+        print(f"\n Registration successful! Your Citizen ID is: {citizen_id}")
         print("Please remember this ID for future reference.")
     
     pause()
 
+
 def report_crime():
-    """Report a new crime"""
+    """
+    Allow citizens to report a crime
+    Verifies citizen ID before accepting the report
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*20 + "REPORT A CRIME")
@@ -107,33 +150,39 @@ def report_crime():
     
     citizen_id = input("\nEnter your Citizen ID: ").strip()
     
-    # Verify citizen exists
+    # Check if citizen exists in database
     citizen = get_citizen_by_id(citizen_id)
     if not citizen:
-        print(f"\n❌ Error: Citizen ID {citizen_id} not found!")
+        print(f"\n Error: Citizen ID {citizen_id} not found!")
         print("Please register first if you haven't already.")
         pause()
         return
     
+    # Greet the citizen and collect crime details
     print(f"\nWelcome, {citizen[1]}!")
     print("\nCrime Types: Theft, Assault, Burglary, Robbery, Vandalism, Fraud, etc.")
     crime_type = input("Enter type of crime: ").strip()
     description = input("Enter detailed description of the incident: ").strip()
     location = input("Enter location where crime occurred: ").strip()
     
+    # Validate all fields are filled
     if crime_type and description and location:
+        # Submit the crime report
         case_id = add_case(citizen_id, crime_type, description, location)
         if case_id:
-            print(f"\n✅ Crime reported successfully!")
+            print(f"\n Crime reported successfully!")
             print(f"Your Case ID is: {case_id}")
             print("An officer will be assigned to your case soon.")
     else:
-        print("\n❌ Error: All fields are required!")
+        print("\n Error: All fields are required!")
     
     pause()
 
+
 def view_citizen_cases():
-    """View cases reported by a citizen"""
+    """
+    Show all cases reported by a specific citizen
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*22 + "MY CASES")
@@ -141,18 +190,17 @@ def view_citizen_cases():
     
     citizen_id = input("\nEnter your Citizen ID: ").strip()
     
-    # Get all cases and filter by citizen
+    # Get all cases and filter to find this citizen's cases
     all_cases = get_all_cases()
-    # Filter cases where the citizen_id matches (checking the correct index)
     citizen_cases = []
+    
     for case in all_cases:
-        # In get_all_cases, citizen_id is not directly in the result
-        # We need to modify the query or get it differently
-        # For now, let's get it properly
+        # Get full case details to check citizen ID
         case_detail = get_case_by_id(case[0])
         if case_detail and str(case_detail[1]) == citizen_id:
             citizen_cases.append(case)
     
+    # Display results
     if citizen_cases:
         display_cases(citizen_cases)
     else:
@@ -160,8 +208,12 @@ def view_citizen_cases():
     
     pause()
 
+
 def update_citizen_info():
-    """Update citizen information"""
+    """
+    Allow citizens to update their personal information
+    Shows current info and lets them update specific fields
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*16 + "UPDATE CITIZEN INFORMATION")
@@ -172,30 +224,36 @@ def update_citizen_info():
     # Verify citizen exists
     citizen = get_citizen_by_id(citizen_id)
     if not citizen:
-        print(f"\n❌ Error: Citizen ID {citizen_id} not found!")
+        print(f"\n Error: Citizen ID {citizen_id} not found!")
         pause()
         return
     
+    # Show current information
     print(f"\nCurrent information for: {citizen[1]}")
     print(f"Phone: {citizen[2]}")
     print(f"Email: {citizen[3] or 'Not provided'}")
     print(f"Address: {citizen[4] or 'Not provided'}")
     
+    # Collect new information (press Enter to keep current)
     print("\n--- Enter new information (press Enter to keep current) ---")
     full_name = input("New full name: ").strip() or None
     phone_number = input("New phone number: ").strip() or None
     email = input("New email: ").strip() or None
     address = input("New address: ").strip() or None
     
+    # Update the database
     if update_citizen(citizen_id, full_name, phone_number, email, address):
-        print("\n✅ Information updated successfully!")
+        print("\n Information updated successfully!")
     else:
-        print("\n❌ No changes made.")
+        print("\n No changes made.")
     
     pause()
 
+
 def view_all_citizens():
-    """View all registered citizens"""
+    """
+    Display a list of all registered citizens
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*18 + "ALL REGISTERED CITIZENS")
@@ -205,10 +263,14 @@ def view_all_citizens():
     display_citizens(citizens)
     pause()
 
-# ==================== OFFICER PORTAL ====================
+
+# OFFICER PORTAL
 
 def officer_menu():
-    """Officer portal menu"""
+    """
+    Display the officer portal menu with all officer options
+    Loops until user chooses to go back to main menu
+    """
     while True:
         clear_screen()
         print("\n" + "="*60)
@@ -229,6 +291,7 @@ def officer_menu():
         
         choice = input("\nEnter your choice (1-11): ").strip()
         
+        # Call appropriate function based on user's choice
         if choice == '1':
             register_officer()
         elif choice == '2':
@@ -250,35 +313,45 @@ def officer_menu():
         elif choice == '10':
             view_all_officers()
         elif choice == '11':
-            break
+            break  # Exit to main menu
         else:
-            print("❌ Invalid choice! Please try again.")
+            print(" Invalid choice! Please try again.")
             pause()
 
+
 def register_officer():
-    """Register a new officer"""
+    """
+    Register a new police officer in the system
+    Collects name, badge number, rank, phone, and station (optional)
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*18 + "OFFICER REGISTRATION")
     print("="*60)
     
+    # Collect officer information
     full_name = input("\nEnter full name: ").strip()
     badge_number = input("Enter badge number: ").strip()
     rank = input("Enter rank (e.g., Officer, Sergeant, Inspector): ").strip()
     phone_number = input("Enter phone number: ").strip()
     station = input("Enter police station (optional, press Enter to skip): ").strip() or None
     
+    # Validate all required fields are filled
     if full_name and badge_number and rank and phone_number:
+        # Add officer to database
         officer_id = add_officer(full_name, badge_number, rank, phone_number, station)
         if officer_id:
-            print(f"\n✅ Registration successful! Your Officer ID is: {officer_id}")
+            print(f"\n Registration successful! Your Officer ID is: {officer_id}")
     else:
-        print("\n❌ Error: All required fields must be filled!")
+        print("\n Error: All required fields must be filled!")
     
     pause()
 
+
 def view_all_cases_officer():
-    """View all cases"""
+    """
+    Display all crime cases in the system
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*22 + "ALL CASES")
@@ -288,13 +361,18 @@ def view_all_cases_officer():
     display_cases(cases)
     pause()
 
+
 def filter_cases_by_status():
-    """Filter cases by status"""
+    """
+    Filter and display cases by their status
+    (Pending, Under Investigation, Resolved, Closed)
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*18 + "FILTER CASES BY STATUS")
     print("="*60)
     
+    # Show status options
     print("\nAvailable statuses:")
     print("1. Pending")
     print("2. Under Investigation")
@@ -303,7 +381,7 @@ def filter_cases_by_status():
     
     choice = input("\nEnter choice (1-4): ").strip()
     
-    # Map choice to actual status
+    # Convert number choice to actual status text
     status_map = {
         '1': 'Pending',
         '2': 'Under Investigation',
@@ -311,20 +389,26 @@ def filter_cases_by_status():
         '4': 'Closed'
     }
     
+    # Validate choice
     if choice not in status_map:
-        print("\n❌ Invalid choice!")
+        print("\n Invalid choice!")
         pause()
         return
     
     status = status_map[choice]
     print(f"\nSearching for cases with status: {status}")
     
+    # Get and display filtered cases
     cases = get_cases_by_status(status)
     display_cases(cases)
     pause()
 
+
 def filter_cases_by_location():
-    """Filter cases by location"""
+    """
+    Filter and display cases by location
+    Uses partial matching (e.g., "Nairobi" will find "Nairobi CBD")
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*18 + "FILTER CASES BY LOCATION")
@@ -332,12 +416,17 @@ def filter_cases_by_location():
     
     location = input("\nEnter location to search: ").strip()
     
+    # Get and display filtered cases
     cases = get_cases_by_location(location)
     display_cases(cases)
     pause()
 
+
 def filter_cases_by_crime_type():
-    """Filter cases by crime type"""
+    """
+    Filter and display cases by type of crime
+    Uses partial matching (e.g., "Theft" will find "Grand Theft")
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*16 + "FILTER CASES BY CRIME TYPE")
@@ -345,12 +434,16 @@ def filter_cases_by_crime_type():
     
     crime_type = input("\nEnter crime type to search: ").strip()
     
+    # Get and display filtered cases
     cases = get_cases_by_crime_type(crime_type)
     display_cases(cases)
     pause()
 
+
 def assign_officer():
-    """Assign officer to a case"""
+    """
+    Assign a police officer to handle a specific case
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*18 + "ASSIGN OFFICER TO CASE")
@@ -359,15 +452,20 @@ def assign_officer():
     case_id = input("\nEnter Case ID: ").strip()
     officer_id = input("Enter Officer ID: ").strip()
     
+    # Attempt to assign officer to case
     if assign_officer_to_case(case_id, officer_id):
-        print("\n✅ Officer assigned successfully!")
+        print("\n Officer assigned successfully!")
     else:
-        print("\n❌ Failed to assign officer!")
+        print("\n Failed to assign officer!")
     
     pause()
 
+
 def update_status():
-    """Update case status"""
+    """
+    Change the status of a case
+    (e.g., from Pending to Under Investigation)
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*20 + "UPDATE CASE STATUS")
@@ -375,6 +473,7 @@ def update_status():
     
     case_id = input("\nEnter Case ID: ").strip()
     
+    # Show status options
     print("\nAvailable statuses:")
     print("1. Pending")
     print("2. Under Investigation")
@@ -383,7 +482,7 @@ def update_status():
     
     choice = input("\nEnter choice (1-4): ").strip()
     
-    # Map choice to actual status
+    # Convert number choice to actual status text
     status_map = {
         '1': 'Pending',
         '2': 'Under Investigation',
@@ -391,42 +490,55 @@ def update_status():
         '4': 'Closed'
     }
     
+    # Validate choice
     if choice not in status_map:
-        print("\n❌ Invalid choice!")
+        print("\n Invalid choice!")
         pause()
         return
     
     status = status_map[choice]
     
+    # Update the case status
     if update_case_status(case_id, status):
-        print(f"\n✅ Case status updated to '{status}' successfully!")
+        print(f"\n Case status updated to '{status}' successfully!")
     else:
-        print("\n❌ Failed to update case status!")
+        print("\n Failed to update case status!")
     
     pause()
 
+
 def add_update():
-    """Add update note to a case"""
+    """
+    Add a progress note or update to a case
+    Officers use this to document investigation progress
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*20 + "ADD CASE UPDATE")
     print("="*60)
     
+    # Collect update information
     case_id = input("\nEnter Case ID: ").strip()
     officer_id = input("Enter your Officer ID: ").strip()
     update_note = input("Enter update note: ").strip()
     
+    # Validate all fields are filled
     if case_id and officer_id and update_note:
+        # Add update to database
         update_id = add_case_update(case_id, officer_id, update_note)
         if update_id:
-            print("\n✅ Case update added successfully!")
+            print("\n Case update added successfully!")
     else:
-        print("\n❌ All fields are required!")
+        print("\n All fields are required!")
     
     pause()
 
+
 def view_case_updates():
-    """View all updates for a case"""
+    """
+    View all progress updates for a specific case
+    Shows the investigation timeline
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*20 + "VIEW CASE UPDATES")
@@ -434,12 +546,16 @@ def view_case_updates():
     
     case_id = input("\nEnter Case ID: ").strip()
     
+    # Get and display all updates for this case
     updates = get_updates_by_case(case_id)
     display_case_updates(updates)
     pause()
 
+
 def view_all_officers():
-    """View all registered officers"""
+    """
+    Display a list of all registered officers
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*18 + "ALL REGISTERED OFFICERS")
@@ -449,10 +565,14 @@ def view_all_officers():
     display_officers(officers)
     pause()
 
-# ==================== PUBLIC VIEWS ====================
+
+# PUBLIC VIEWS
 
 def view_all_cases_public():
-    """View all cases (public view)"""
+    """
+    Display all cases for public viewing
+    Anyone can see this from the main menu
+    """
     clear_screen()
     print("\n" + "="*60)
     print(" "*22 + "ALL CASES")
