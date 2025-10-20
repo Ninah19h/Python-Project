@@ -1,4 +1,22 @@
+# Python
 env/
 __pycache__/
 *.pyc
 *.log
+
+# Environment variables (important for database credentials!)
+.env
+*.env
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# PostgreSQL backup files (if you create any)
+*.sql.backup
+*.dump

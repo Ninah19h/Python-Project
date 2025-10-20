@@ -4,18 +4,17 @@ DROP TABLE IF EXISTS cases CASCADE;
 DROP TABLE IF EXISTS officers CASCADE;
 DROP TABLE IF EXISTS citizens CASCADE;
 
--- Citizens Table
+-- Citizens Table (NO national_id)
 CREATE TABLE citizens (
     citizen_id SERIAL PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
-    national_id VARCHAR(20) UNIQUE NOT NULL,
     phone_number VARCHAR(15) NOT NULL,
     email VARCHAR(100),
     address TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Officers Table
+-- Officers Table (NO badge changes - officers need badge numbers)
 CREATE TABLE officers (
     officer_id SERIAL PRIMARY KEY,
     full_name VARCHAR(100) NOT NULL,
@@ -26,7 +25,7 @@ CREATE TABLE officers (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Cases Table
+-- Cases Table (same)
 CREATE TABLE cases (
     case_id SERIAL PRIMARY KEY,
     citizen_id INTEGER NOT NULL,
@@ -41,7 +40,7 @@ CREATE TABLE cases (
     FOREIGN KEY (officer_id) REFERENCES officers(officer_id) ON DELETE SET NULL
 );
 
--- Case Updates Table
+-- Case Updates Table (same)
 CREATE TABLE case_updates (
     update_id SERIAL PRIMARY KEY,
     case_id INTEGER NOT NULL,
@@ -52,7 +51,7 @@ CREATE TABLE case_updates (
     FOREIGN KEY (officer_id) REFERENCES officers(officer_id) ON DELETE CASCADE
 );
 
--- Create indexes for better query performance
+-- Create indexes
 CREATE INDEX idx_cases_citizen ON cases(citizen_id);
 CREATE INDEX idx_cases_officer ON cases(officer_id);
 CREATE INDEX idx_cases_status ON cases(status);

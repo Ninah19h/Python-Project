@@ -3,9 +3,10 @@ from psycopg2 import pool
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# Load environment variables from the .env file
 load_dotenv()
-# Database configuration
+
+# Database settings (uses .env values or defaults)
 DB_CONFIG = {
     'host': os.getenv('DB_HOST', 'localhost'),
     'database': os.getenv('DB_NAME', 'crime_reporting_db'),
@@ -14,11 +15,11 @@ DB_CONFIG = {
     'port': os.getenv('DB_PORT', '5432')
 }
 
-# Connection pool
+# This will hold our connection pool
 connection_pool = None
 
 def init_pool():
-    """Initialize connection pool"""
+    """Create a pool of database connections"""
     global connection_pool
     try:
         connection_pool = psycopg2.pool.SimpleConnectionPool(1, 20, **DB_CONFIG)
@@ -28,7 +29,7 @@ def init_pool():
         print(f"✗ Error creating connection pool: {e}")
 
 def get_connection():
-    """Get a connection from the pool"""
+    """Get one connection from the pool"""
     try:
         if connection_pool:
             return connection_pool.getconn()
@@ -37,7 +38,7 @@ def get_connection():
         return None
 
 def release_connection(conn):
-    """Return connection to the pool"""
+    """Return a connection back to the pool"""
     try:
         if connection_pool and conn:
             connection_pool.putconn(conn)
@@ -45,7 +46,7 @@ def release_connection(conn):
         print(f"✗ Error releasing connection: {e}")
 
 def close_all_connections():
-    """Close all connections"""
+    """Close every connection in the pool"""
     try:
         if connection_pool:
             connection_pool.closeall()
@@ -54,7 +55,7 @@ def close_all_connections():
         print(f"✗ Error closing connections: {e}")
 
 def test_connection():
-    """Test database connection"""
+    """Check if the database connection works"""
     conn = get_connection()
     if conn:
         try:
@@ -73,7 +74,7 @@ def test_connection():
     return False
 
 def execute_schema():
-    """Execute schema.sql to create tables"""
+    """Run the schema.sql file to create tables"""
     conn = get_connection()
     if conn:
         try:
