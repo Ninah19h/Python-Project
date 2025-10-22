@@ -14,7 +14,10 @@ Install Dependancies
 > pip install -r requirements.txt
 
 Set Up PostgreSQL Database (for those without the table)
-> CREATE DATABASE crime_reporting_db;
+> CREATE DATABASE crime_reporting_db; 
+
+If db exists you connect the db
+\c crime_reporting_db
 
 Configure Environment Variables
 > Create a .env file at the project root
@@ -23,6 +26,9 @@ DB_NAME=crime_reporting_db
 DB_USER=postgres
 DB_PASSWORD=Password
 DB_PORT=5432
+
+Exit Postgress
+\q
 
  Initialize Database Tables
  > python -c "from database.connection import init_pool, execute_schema; init_pool(); execute_schema()"
